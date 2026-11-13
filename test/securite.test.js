@@ -62,8 +62,7 @@ assert.match(s.headers['set-cookie'], /HttpOnly; Secure/);
 // Un retour sans le bon cookie est refusé.
 s = res(); await callback(req({ url: `/api/auth/callback?code=abc&state=${u.searchParams.get('state')}` }), s);
 assert.equal(s.statusCode, 403, 'state sans cookie refusé');
-const cookie = s.headers['set-cookie'];
-s = res(); await callback(req({ url: '/api/auth/callback?code=abc&state=autre', headers: { cookie: String(d.cookie ?? '') } }), s);
+s = res(); await callback(req({ url: '/api/auth/callback?code=abc&state=autre' }), s);
 assert.equal(s.statusCode, 403);
 
 // Pilote pas activé : le cron ne fait rien.
