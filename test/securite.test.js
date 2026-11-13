@@ -5,6 +5,7 @@ import { Readable } from 'node:stream';
 
 process.env.CRON_SECRET = 'mot-de-passe-de-test-tres-long';
 delete process.env.BLOB_READ_WRITE_TOKEN;
+delete process.env.BLOB_STORE_ID;
 delete process.env.VERCEL;
 process.chdir(new URL('.', import.meta.url).pathname);
 fs.rmSync('.data', { recursive: true, force: true });
