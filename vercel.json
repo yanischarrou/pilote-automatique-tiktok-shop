@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    { "path": "/api/run", "schedule": "0 11 * * *" },
+    { "path": "/api/veille", "schedule": "0 16 * * *" }
+  ],
+  "functions": {
+    "api/run.js": { "maxDuration": 300 },
+    "api/veille.js": { "maxDuration": 300 }
+  }
+}

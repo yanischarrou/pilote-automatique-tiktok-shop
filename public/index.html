@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Pilote automatique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --encre: #1b1336; --gris: #6b6782; --trait: #ebe7f3; --creme: #faf8f3; --blanc: #fff;
+    --violet: #6c3bff; --violet-l: #efe9ff; --rose: #fe2c55; --rose-l: #ffe6ec;
+    --orange: #d97757; --orange-l: #fdeee6; --vert: #12a150; --vert-l: #e2f7ea; --jaune-l: #fff6d1;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--creme); color: var(--encre); font: 15px/1.5 Inter, system-ui, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1, h2, h3 { font-family: Poppins, system-ui, sans-serif; line-height: 1.2; margin: 0; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 18px; display: flex; align-items: center; gap: 10px; }
+  .tete { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .logo { width: 44px; height: 44px; border-radius: 12px; background: var(--violet); display: grid; place-items: center; flex: none; }
+  .logo svg { width: 26px; height: 26px; stroke: #fff; }
+  .sous { color: var(--gris); font-size: 14px; margin-top: 2px; }
+  .badge { margin-left: auto; font: 600 12px Poppins, sans-serif; padding: 6px 10px; border-radius: 999px; background: var(--trait); color: var(--gris); white-space: nowrap; }
+  .badge.on { background: var(--vert-l); color: var(--vert); }
+  .carte { background: var(--blanc); border: 1px solid var(--trait); border-radius: 16px; padding: 20px; margin: 14px 0; }
+  .num { width: 28px; height: 28px; border-radius: 50%; background: var(--violet-l); color: var(--violet); display: grid; place-items: center; font: 700 14px Poppins, sans-serif; flex: none; }
+  .fait .num { background: var(--vert); color: #fff; }
+  .aide { color: var(--gris); font-size: 14px; margin: 6px 0 14px; }
+  label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 6px; }
+  input[type=text], input[type=email], input[type=password], select {
+    width: 100%; padding: 11px 12px; font: 16px Inter, sans-serif; color: var(--encre); background: var(--creme);
+    border: 1px solid var(--trait); border-radius: 10px; }
+  input:focus, select:focus { outline: 2px solid var(--violet); outline-offset: 1px; background: #fff; }
+  .case { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; margin-top: 14px; }
+  .case input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--violet); }
+  button { font: 600 15px Poppins, sans-serif; border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  .principal { background: var(--violet); color: #fff; }
+  .rose { background: var(--rose); color: #fff; }
+  .clair { background: var(--violet-l); color: var(--violet); }
+  .neutre { background: var(--trait); color: var(--encre); }
+  .boutons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .copie { display: flex; gap: 8px; align-items: stretch; margin-top: 6px; }
+  .copie code { flex: 1; min-width: 0; overflow-wrap: anywhere; background: var(--jaune-l); border: 1px dashed #e0b300; border-radius: 10px; padding: 10px 12px; font: 13px ui-monospace, Menlo, monospace; }
+  .copie button { padding: 8px 14px; }
+  .entrepot { border: 1px solid var(--trait); border-radius: 12px; padding: 4px 14px 14px; margin-top: 12px; background: var(--creme); }
+  .entrepot .haut { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font: 600 14px Poppins, sans-serif; }
+  .entrepot .retirer { background: none; color: var(--rose); padding: 4px 6px; font-size: 13px; }
+  .msg { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: 14px; display: none; }
+  .msg.ok { display: block; background: var(--vert-l); color: #0b6b35; }
+  .msg.ko { display: block; background: var(--rose-l); color: #a3112e; }
+  .msg.info { display: block; background: var(--violet-l); color: var(--violet); }
+  .etapes { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+  .etapes li { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+  .etapes li::before { content: ""; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--trait); flex: none; }
+  .etapes li.ok::before { background: var(--vert) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/12px no-repeat; border-color: var(--vert); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--trait); vertical-align: top; }
+  th { color: var(--gris); font-weight: 600; }
+  .pied { text-align: center; color: var(--gris); font-size: 12px; margin-top: 30px; }
+  .cache { display: none !important; }
+  @media (max-width: 480px) { .carte { padding: 16px; } h1 { font-size: 20px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="tete">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>
+    <div><h1>Ton pilote automatique</h1><div class="sous">Tes bordereaux TikTok Shop envoyés à ton entrepôt, chaque jour</div></div>
+    <span class="badge" id="badge">…</span>
+  </div>
+
+  <!-- Connexion -->
+  <section class="carte" id="connexion">
+    <h2>Entre le mot de passe du robot</h2>
+    <p class="aide">C'est celui que tu as choisi sur Vercel à l'installation (la case <b>CRON_SECRET</b>).</p>
+    <form id="f-connexion">
+      <input type="password" id="mdp" autocomplete="current-password" placeholder="Mot de passe du robot" required>
+      <div class="boutons"><button class="principal">Ouvrir</button></div>
+    </form>
+    <div class="msg" id="m-connexion"></div>
+  </section>
+
+  <div id="page" class="cache">
+    <section class="carte">
+      <h2>Où tu en es</h2>
+      <ul class="etapes" id="etapes"></ul>
+    </section>
+
+    <form id="f-reglages">
+      <section class="carte" id="c-app">
+        <h2><span class="num">1</span>Ton app TikTok Shop</h2>
+        <p class="aide">Les 3 codes de ton app, sur partner.tiktokshop.com › App &amp; Service › ton app.</p>
+        <label for="TTS_APP_KEY">App key</label>
+        <input type="text" id="TTS_APP_KEY" autocomplete="off" spellcheck="false">
+        <label for="TTS_APP_SECRET">App secret</label>
+        <input type="password" id="TTS_APP_SECRET" autocomplete="off" spellcheck="false">
+        <label for="TTS_SERVICE_ID">Service ID</label>
+        <input type="text" id="TTS_SERVICE_ID" autocomplete="off" spellcheck="false">
+        <label>Adresse de redirection, à coller dans ton app TikTok</label>
+        <div class="copie"><code id="redirection">…</code><button type="button" class="clair" data-copie="redirection">Copier</button></div>
+      </section>
+
+      <section class="carte" id="c-gmail">
+        <h2><span class="num">2</span>Tes mails</h2>
+        <p class="aide">Le robot écrit à ton entrepôt depuis ton Gmail, et te met en copie.</p>
+        <label for="GMAIL_USER">Ton adresse Gmail</label>
+        <input type="email" id="GMAIL_USER" autocomplete="off" placeholder="toi@gmail.com">
+        <label for="GMAIL_APP_PASSWORD">Mot de passe d'application Google (16 lettres)</label>
+        <input type="password" id="GMAIL_APP_PASSWORD" autocomplete="off" spellcheck="false">
+        <label for="NOM">Ton prénom ou le nom de ta boutique (la signature des mails)</label>
+        <input type="text" id="NOM" autocomplete="off">
+        <div class="boutons"><button type="button" class="clair" id="b-essai-mail">Envoyer un mail d'essai</button></div>
+        <div class="msg" id="m-gmail"></div>
+      </section>
+
+      <section class="carte" id="c-entrepot">
+        <h2><span class="num">3</span>Ton entrepôt</h2>
+        <p class="aide">Là où partent les bordereaux. Si tu prépares tes colis toi-même, mets ta propre adresse.</p>
+        <div id="entrepots"></div>
+        <div class="boutons"><button type="button" class="neutre" id="b-ajout">+ Ajouter un entrepôt</button></div>
+        <label class="case"><input type="checkbox" id="aucun_colis" checked> Prévenir l'entrepôt les jours sans commande (« aucun colis »)</label>
+      </section>
+
+      <div class="boutons"><button class="principal" id="b-enregistrer">Enregistrer</button></div>
+      <div class="msg" id="m-reglages"></div>
+    </form>
+
+    <section class="carte" id="c-boutique">
+      <h2><span class="num">4</span>Ta boutique</h2>
+      <p class="aide">Enregistre d'abord les étapes 1 à 3, puis autorise ta boutique : TikTok te demande de te connecter et de cliquer « Autoriser ».</p>
+      <div id="boutiques"></div>
+      <div class="boutons"><button class="rose" id="b-autoriser">Autoriser ma boutique sur TikTok</button></div>
+      <div class="msg" id="m-boutique"></div>
+    </section>
+
+    <section class="carte" id="c-test">
+      <h2><span class="num">5</span>Le test à blanc</h2>
+      <p class="aide">Le robot lit tes commandes à expédier et te montre ce qu'il ferait. Rien n'est expédié, aucun mail ne part.</p>
+      <div class="boutons"><button class="clair" id="b-test">Lancer le test à blanc</button></div>
+      <div class="msg" id="m-test"></div>
+      <div id="r-test"></div>
+    </section>
+
+    <section class="carte" id="c-actif">
+      <h2><span class="num">6</span>Le pilote automatique</h2>
+      <p class="aide">Une fois activé, il passe chaque jour <b>entre midi et 13 h</b> (entre 13 h et 14 h l'été) et une seconde fois vers 17 h pour rattraper ce qui aurait raté. Ton ordinateur peut rester éteint.</p>
+      <div class="boutons">
+        <button class="principal" id="b-actif">Activer le pilote automatique</button>
+        <button class="neutre cache" id="b-maintenant">Lancer un passage maintenant</button>
+      </div>
+      <div class="msg" id="m-actif"></div>
+      <div id="dernier"></div>
+    </section>
+
+    <div class="boutons" style="justify-content:center"><button class="neutre" id="b-deconnexion">Se déconnecter</button></div>
+  </div>
+  <p class="pied">Pilote automatique TikTok Shop · modèle offert par TTSM</p>
+</main>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  let mdp = '';
+  try { mdp = sessionStorage.getItem('pilote-mdp') || ''; } catch {}
+  let etat = null;
+
+  function message(id, type, texte) {
+    const m = $(id);
+    m.className = 'msg ' + type;
+    m.textContent = texte;
+  }
+
+  async function api(chemin, options = {}) {
+    const r = await fetch(chemin, {
+      ...options,
+      headers: { 'content-type': 'application/json', authorization: 'Bearer ' + mdp, ...(options.headers || {}) },
+    });
+    let j = {};
+    try { j = await r.json(); } catch {}
+    j.status = r.status;
+    return j;
+  }
+
+  function memoriser(v) {
+    mdp = v;
+    try { v ? sessionStorage.setItem('pilote-mdp', v) : sessionStorage.removeItem('pilote-mdp'); } catch {}
+  }
+
+  // ---------------------------------------------------------------- entrepôts
+  function blocEntrepot(e = {}, i = 0, total = 1) {
+    const d = document.createElement('div');
+    d.className = 'entrepot';
+    d.innerHTML = `
+      <div class="haut"><span></span><button type="button" class="retirer">Retirer</button></div>
+      <label>Nom de l'entrepôt</label><input type="text" data-k="nom" placeholder="Mon entrepôt">
+      <label>Prénom de ton contact</label><input type="text" data-k="contact" placeholder="Karim">
+      <label>Son adresse e-mail</label><input type="email" data-k="email" placeholder="contact@entrepot.fr">
+      <label>Comment partent les colis</label>
+      <select data-k="handover">
+        <option value="DROP_OFF">Dépôt chez le transporteur</option>
+        <option value="PICKUP">Enlèvement : il passe les chercher</option>
+      </select>
+      <div data-mots><label>Mots du nom du produit qui part d'ici (séparés par des virgules)</label><input type="text" data-k="mots_produit" placeholder="tapis, rug"></div>`;
+    d.querySelector('.haut span').textContent = total > 1 ? `Entrepôt ${i + 1}` : 'Entrepôt';
+    for (const el of d.querySelectorAll('[data-k]')) el.value = e[el.dataset.k] ?? (el.dataset.k === 'handover' ? 'DROP_OFF' : '');
+    d.dataset.cle = e.cle || '';
+    d.querySelector('.retirer').addEventListener('click', () => { d.remove(); renumeroter(); });
+    return d;
+  }
+  function renumeroter() {
+    const blocs = [...$('entrepots').children];
+    blocs.forEach((b, i) => {
+      b.querySelector('.haut span').textContent = blocs.length > 1 ? `Entrepôt ${i + 1}` : 'Entrepôt';
+      b.querySelector('.retirer').classList.toggle('cache', blocs.length === 1);
+      b.querySelector('[data-mots]').classList.toggle('cache', blocs.length === 1);
+    });
+  }
+  function lireEntrepots() {
+    return [...$('entrepots').children].map((b) => {
+      const e = { cle: b.dataset.cle || undefined };
+      for (const el of b.querySelectorAll('[data-k]')) e[el.dataset.k] = el.value.trim();
+      return e;
+    });
+  }
+  $('b-ajout').addEventListener('click', () => { $('entrepots').append(blocEntrepot({}, 0, 2)); renumeroter(); });
+
+  // ---------------------------------------------------------------- affichage
+  function afficher(j) {
+    etat = j;
+    const r = j.reglages || {};
+    for (const k of ['TTS_APP_KEY', 'TTS_SERVICE_ID', 'GMAIL_USER', 'NOM']) $(k).value = r[k] || '';
+    $('TTS_APP_SECRET').value = '';
+    $('TTS_APP_SECRET').placeholder = r.TTS_APP_SECRET_enregistre ? 'Enregistré (laisse vide pour le garder)' : '';
+    $('GMAIL_APP_PASSWORD').value = '';
+    $('GMAIL_APP_PASSWORD').placeholder = r.GMAIL_APP_PASSWORD_enregistre ? 'Enregistré (laisse vide pour le garder)' : 'abcd efgh ijkl mnop';
+    $('redirection').textContent = j.redirection || '';
+    $('aucun_colis').checked = r.aucun_colis !== false;
+    $('entrepots').innerHTML = '';
+    const liste = (r.entrepots && r.entrepots.length) ? r.entrepots : [{}];
+    liste.forEach((e, i) => $('entrepots').append(blocEntrepot(e, i, liste.length)));
+    renumeroter();
+
+    const et = j.etapes || {};
+    const lignes = [
+      ['app', 'Ton app TikTok Shop'], ['gmail', "Tes mails (mail d'essai reçu)"], ['entrepot', 'Ton entrepôt'],
+      ['boutique', 'Ta boutique autorisée'], ['test', 'Le test à blanc'], ['actif', 'Le pilote automatique activé'],
+    ];
+    $('etapes').innerHTML = '';
+    for (const [k, t] of lignes) {
+      const li = document.createElement('li');
+      li.textContent = t;
+      if (et[k]) li.className = 'ok';
+      $('etapes').append(li);
+    }
+    const cartes = { app: 'c-app', gmail: 'c-gmail', entrepot: 'c-entrepot', boutique: 'c-boutique', test: 'c-test', actif: 'c-actif' };
+    for (const [k, id] of Object.entries(cartes)) $(id).classList.toggle('fait', !!et[k]);
+
+    const b = $('boutiques');
+    b.innerHTML = '';
+    if ((j.boutiques || []).length) {
+      const p = document.createElement('p');
+      p.textContent = 'Autorisée : ' + j.boutiques.map((s) => `${s.nom} (${s.pays})`).join(', ');
+      b.append(p);
+      $('b-autoriser').textContent = 'Autoriser à nouveau';
+    }
+
+    $('badge').textContent = et.actif ? 'Actif' : 'En pause';
+    $('badge').classList.toggle('on', !!et.actif);
+    $('b-actif').textContent = et.actif ? 'Mettre en pause' : 'Activer le pilote automatique';
+    $('b-actif').className = et.actif ? 'neutre' : 'principal';
+    $('b-maintenant').classList.toggle('cache', !et.actif);
+
+    const d = $('dernier');
+    d.innerHTML = '';
+    if (j.dernier_passage) {
+      const p = j.dernier_passage;
+      const el = document.createElement('p');
+      el.className = 'aide';
+      const quand = new Date(p.at).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' });
+      el.textContent = `Dernier passage : ${quand} · ${p.labels} bordereau(x) · ${(p.mails || []).length} mail(s)` + (p.errors ? ` · ${p.errors} problème(s), détail dans ton Gmail` : '');
+      d.append(el);
+    }
+  }
+
+  async function charger() {
+    const j = await api('/api/etat');
+    if (j.status === 401) {
+      memoriser('');
+      $('page').classList.add('cache');
+      $('connexion').classList.remove('cache');
+      if ($('mdp').value) message('m-connexion', 'ko', 'Mot de passe refusé.');
+      return;
+    }
+    if (j.erreur === 'mot_de_passe_trop_court') {
+      $('connexion').classList.remove('cache');
+      message('m-connexion', 'ko', "Ton mot de passe du robot fait moins de 12 caractères. Sur Vercel : ton projet › Settings › Environment Variables › CRON_SECRET, mets-en un plus long, puis Deployments › Redeploy.");
+      return;
+    }
+    if (j.erreur === 'pas_de_blob') {
+      $('connexion').classList.remove('cache');
+      message('m-connexion', 'ko', "Le stockage du robot n'est pas relié. Sur Vercel : ton projet › Storage › Create › Blob › Connect, puis Deployments › Redeploy.");
+      return;
+    }
+    if (!j.ok) { message('m-connexion', 'ko', 'Erreur : ' + (j.erreur || j.status)); return; }
+    $('connexion').classList.add('cache');
+    $('page').classList.remove('cache');
+    afficher(j);
+  }
+
+  // ---------------------------------------------------------------- actions
+  $('f-connexion').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    memoriser($('mdp').value.trim().replace(/^["']|["']$/g, ''));
+    await charger();
+  });
+  $('b-deconnexion').addEventListener('click', () => { memoriser(''); location.reload(); });
+
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-copie]');
+    if (!b) return;
+    try { await navigator.clipboard.writeText($(b.dataset.copie).textContent); b.textContent = 'Copié'; setTimeout(() => (b.textContent = 'Copier'), 1500); } catch {}
+  });
+
+  function corpsReglages() {
+    const c = {
+      TTS_APP_KEY: $('TTS_APP_KEY').value, TTS_SERVICE_ID: $('TTS_SERVICE_ID').value, GMAIL_USER: $('GMAIL_USER').value,
+      NOM: $('NOM').value, entrepots: lireEntrepots(), aucun_colis: $('aucun_colis').checked,
+    };
+    if ($('TTS_APP_SECRET').value.trim()) c.TTS_APP_SECRET = $('TTS_APP_SECRET').value;
+    if ($('GMAIL_APP_PASSWORD').value.trim()) c.GMAIL_APP_PASSWORD = $('GMAIL_APP_PASSWORD').value;
+    return c;
+  }
+
+  async function enregistrer() {
+    const j = await api('/api/reglages', { method: 'POST', body: JSON.stringify(corpsReglages()) });
+    if (!j.ok) { message('m-reglages', 'ko', (j.erreurs || ['Erreur ' + j.status]).join(' ')); return false; }
+    message('m-reglages', 'ok', 'Enregistré.');
+    await charger();
+    return true;
+  }
+
+  $('f-reglages').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('b-enregistrer').disabled = true;
+    try { await enregistrer(); } finally { $('b-enregistrer').disabled = false; }
+  });
+
+  $('b-essai-mail').addEventListener('click', async () => {
+    const b = $('b-essai-mail');
+    b.disabled = true;
+    message('m-gmail', 'info', 'Envoi…');
+    try {
+      if (!(await enregistrer())) { message('m-gmail', 'ko', 'Corrige les réglages en rouge plus bas, puis réessaie.'); return; }
+      const j = await api('/api/essai-mail', { method: 'POST' });
+      if (j.ok) { message('m-gmail', 'ok', 'Mail envoyé : regarde ta boîte Gmail.'); await charger(); }
+      else message('m-gmail', 'ko', j.erreur || 'Erreur ' + j.status);
+    } finally { b.disabled = false; }
+  });
+
+  $('b-autoriser').addEventListener('click', async () => {
+    const j = await api('/api/auth/start', { method: 'POST' });
+    if (j.ok && j.url) location.href = j.url;
+    else message('m-boutique', 'ko', j.erreur || 'Erreur ' + j.status);
+  });
+
+  function tableau(report) {
+    const t = document.createElement('table');
+    t.innerHTML = '<tr><th>Commande</th><th>Pays</th><th>Ce que ferait le robot</th><th>Entrepôt</th></tr>';
+    const noms = Object.fromEntries(((etat && etat.reglages && etat.reglages.entrepots) || []).map((e) => [e.cle, e.nom || e.email]));
+    for (const p of report.packages || []) {
+      const tr = document.createElement('tr');
+      for (const v of [(p.order_ids || []).join(', '), p.boutique || '', (p.action || '').replace('[test] ', ''), p.entrepot ? (noms[p.entrepot] || p.entrepot) : 'aucun trouvé : chez toi']) {
+        const td = document.createElement('td');
+        td.textContent = v;
+        tr.append(td);
+      }
+      t.append(tr);
+    }
+    return t;
+  }
+
+  $('b-test').addEventListener('click', async () => {
+    const b = $('b-test');
+    b.disabled = true;
+    $('r-test').innerHTML = '';
+    message('m-test', 'info', 'Le robot lit tes commandes… (jusqu’à une minute)');
+    try {
+      const j = await api('/api/run?dry=1', { method: 'POST' });
+      if (!j.ok) { message('m-test', 'ko', j.error || j.erreur || 'Erreur ' + j.status); return; }
+      const r = j.report;
+      const n = (r.packages || []).length;
+      const err = (r.errors || []).map((x) => x.error).filter(Boolean);
+      message('m-test', err.length ? 'ko' : 'ok',
+        `Boutique${r.boutiques.length > 1 ? 's' : ''} lue${r.boutiques.length > 1 ? 's' : ''} : ${r.boutiques.map((s) => s.region).join(', ')}. ` +
+        (n ? `${n} colis en cours.` : "Aucun colis à expédier en ce moment : le test est bon quand même.") +
+        (err.length ? ' Problème : ' + err.join(' ; ') : ''));
+      if (n) $('r-test').append(tableau(r));
+      await charger();
+    } finally { b.disabled = false; }
+  });
+
+  $('b-actif').addEventListener('click', async () => {
+    const actif = !(etat && etat.etapes && etat.etapes.actif);
+    if (actif && !(etat.etapes.boutique && etat.etapes.gmail && etat.etapes.entrepot)) {
+      message('m-actif', 'ko', "Finis d'abord les étapes 1 à 5 : le robot doit pouvoir lire ta boutique et envoyer des mails.");
+      return;
+    }
+    const j = await api('/api/reglages', { method: 'POST', body: JSON.stringify({ actif }) });
+    if (!j.ok) { message('m-actif', 'ko', (j.erreurs || ['Erreur ' + j.status]).join(' ')); return; }
+    message('m-actif', 'ok', actif ? 'Activé : le prochain passage est aujourd’hui ou demain entre midi et 13 h.' : 'En pause : le robot ne fait plus rien.');
+    await charger();
+  });
+
+  $('b-maintenant').addEventListener('click', async () => {
+    if (!confirm("Le robot va expédier les commandes en attente et envoyer les bordereaux à ton entrepôt maintenant. On y va ?")) return;
+    const b = $('b-maintenant');
+    b.disabled = true;
+    message('m-actif', 'info', 'Passage en cours… (jusqu’à quelques minutes)');
+    try {
+      const j = await api('/api/run?maintenant=1', { method: 'POST' });
+      if (!j.ok) { message('m-actif', 'ko', j.error || 'Erreur ' + j.status); return; }
+      const r = j.report;
+      message('m-actif', (r.errors || []).length ? 'ko' : 'ok', r.deja_fait ? "Le passage du jour est déjà fait : rien de nouveau." : `${(r.labels || []).length} bordereau(x) envoyé(s), ${(r.mails || []).length} mail(s).` + ((r.errors || []).length ? ' Des problèmes : regarde ton Gmail.' : ''));
+      await charger();
+    } finally { b.disabled = false; }
+  });
+
+  if (mdp) charger(); else $('badge').textContent = '';
+})();
+</script>
+</body>
+</html>
